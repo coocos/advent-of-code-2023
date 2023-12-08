@@ -1,6 +1,7 @@
-from dataclasses import dataclass
-from pathlib import Path
 import re
+import math
+from pathlib import Path
+from dataclasses import dataclass
 
 
 @dataclass
@@ -37,10 +38,28 @@ def part_1(instructions: str, graph: Graph) -> int:
     return step
 
 
+def part_2(instructions: str, graph: Graph) -> int:
+    step = 0
+    first_time_at_z = {}
+    ghost_nodes = [node for node in graph.values() if node.name.endswith("A")]
+    while len(first_time_at_z) != len(ghost_nodes):
+        for ghost, node in enumerate(ghost_nodes):
+            if instructions[step % len(instructions)] == "L":
+                ghost_nodes[ghost] = graph[node.left]
+            else:
+                ghost_nodes[ghost] = graph[node.right]
+            if node.name.endswith("Z") and ghost not in first_time_at_z:
+                first_time_at_z[ghost] = step
+        step += 1
+    return math.lcm(*first_time_at_z.values())
+
+
 def solve() -> None:
     instructions, graph = parse_input()
 
     assert part_1(instructions, graph) == 17263
+
+    assert part_2(instructions, graph) == 14631604759649
 
 
 if __name__ == "__main__":
